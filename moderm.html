@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GDC Airways Booking</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background: linear-gradient(120deg, #e0eafc 0%, #cfdef3 100%);
+      min-height: 100vh;
+    }
+    .navbar-custom {
+      background: #fff;
+      box-shadow: 0 2px 16px rgba(44,62,80,0.06);
+    }
+    .navbar-brand {
+      font-weight: bold;
+      letter-spacing: 2px;
+      color: #2d3a4b !important;
+      font-size: 1.3rem;
+    }
+    .nav-link {
+      color: #2d3a4b !important;
+      font-weight: 500;
+      margin-right: 12px;
+      transition: color 0.2s;
+    }
+    .nav-link:hover, .nav-link.active {
+      color: #2d9cdb !important;
+    }
+    .welcome-user {
+      font-weight: 500;
+      color: #217dbb;
+      margin-left: 16px;
+    }
+    .main-section {
+      padding: 60px 15px 40px 15px;
+      text-align: center;
+    }
+    .booking-card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 24px rgba(44,62,80,0.08);
+      padding: 32px 24px;
+      max-width: 700px;
+      margin: 40px auto 0 auto;
+    }
+    .booking-summary {
+      background: #f5faff;
+      border-radius: 12px;
+      padding: 18px;
+      margin-top: 28px;
+      box-shadow: 0 1px 8px rgba(44,62,80,0.04);
+    }
+    .creative-quote-card, .future-card {
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 2px 24px rgba(44,62,80,0.08);
+      padding: 28px 18px;
+      transition: transform 0.22s cubic-bezier(.22,1,.36,1), box-shadow 0.22s, background 0.22s;
+      cursor: pointer;
+      position: relative;
+      text-align: center;
+      min-height: 200px;
+      outline: none;
+    }
+    .creative-quote-card:hover, .creative-quote-card:focus,
+    .future-card:hover, .future-card:focus {
+      transform: scale(1.04) translateY(-6px) rotate(-1deg);
+      box-shadow: 0 12px 36px rgba(44,62,80,0.14), 0 0 0 4px #2d9cdb33;
+      background: #fafdff;
+    }
+    .creative-quote-card:active, .future-card:active {
+      background: #e0eafc;
+      box-shadow: 0 2px 12px rgba(44,62,80,0.08);
+      transform: scale(0.98);
+    }
+    .creative-quote-card h5, .future-card h6 {
+      color: #2d3a4b;
+      font-weight: 600;
+    }
+    @media (max-width: 767px) {
+      .creative-quote-card, .future-card { padding: 16px 8px; min-height: 150px;}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Auth Card -->
+  <div class="center-card" id="authCard" style="min-height:100vh;display:flex;align-items:center;justify-content:center;">
+    <div class="card p-4" style="max-width: 350px; width: 100%;">
+      <div id="loginDiv">
+        <h3 class="text-center mb-3">Login</h3>
+        <input type="email" id="loginEmail" class="form-control mb-3" placeholder="Email" />
+        <input type="password" id="loginPassword" class="form-control mb-3" placeholder="Password" />
+        <button onclick="login()" class="btn btn-primary w-100 mb-2">Login</button>
+        <p class="text-center mb-0">Don't have an account? <a href="#" onclick="toggleForms()">Sign up</a></p>
+      </div>
+      <div id="signupDiv" class="d-none">
+        <h3 class="text-center mb-3">Sign Up</h3>
+        <input type="email" id="signupEmail" class="form-control mb-3" placeholder="Email" />
+        <input type="password" id="signupPassword" class="form-control mb-3" placeholder="Password" />
+        <button onclick="signup()" class="btn btn-success w-100 mb-2">Sign Up</button>
+        <p class="text-center mb-0">Already have an account? <a href="#" onclick="toggleForms()">Login</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-custom d-none" id="mainNavbar">
+    <div class="container">
+      <a class="navbar-brand" href="#">GDC Airways</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+        <ul class="navbar-nav align-items-center">
+          <li class="nav-item"><a class="nav-link active" href="#" onclick="showSection('home')">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="#" onclick="showSection('book')">Book Ticket</a></li>
+          <li class="nav-item"><a class="nav-link" href="#" onclick="showSection('mybookings')">My Bookings</a></li>
+          <li class="nav-item"><a class="nav-link" href="#" onclick="logout()">Logout</a></li>
+          <li class="nav-item"><span class="welcome-user" id="welcomeUser"></span></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Sections -->
+  <div id="mainSections" class="d-none">
+    <!-- Home -->
+    <section id="homeSection" class="main-section position-relative" style="overflow:hidden;">
+      <!-- Flight background image -->
+      <div class="position-absolute top-0 start-0 w-100 h-100" style="z-index:0; pointer-events:none; opacity:0.16; background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat;"></div>
+      <div class="container position-relative" style="z-index:1;">
+        <h2 class="mb-4" style="font-weight:700; color:#2d3a4b; text-shadow:0 2px 8px #fff8;">GDC Airways: Travel Beyond Limits</h2>
+        <!-- Creative Quotes Cards -->
+        <div class="row g-4 mb-4">
+          <div class="col-md-4">
+            <div class="creative-quote-card h-100" tabindex="0">
+              <i class="fa-solid fa-ticket fa-2x mb-2 text-primary"></i>
+              <h5 class="mb-2">"The world is a book, and those who do not travel read only one page."</h5>
+              <span class="text-muted">– Saint Augustine</span>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="creative-quote-card h-100" tabindex="0">
+              <i class="fa-solid fa-plane-departure fa-2x mb-2 text-info"></i>
+              <h5 class="mb-2">"Life is short and the world is wide. Book your ticket today."</h5>
+              <span class="text-muted">– GDC Airways</span>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="creative-quote-card h-100" tabindex="0">
+              <i class="fa-solid fa-globe fa-2x mb-2 text-success"></i>
+              <h5 class="mb-2">"Travel is the only thing you buy that makes you richer."</h5>
+              <span class="text-muted">– Anonymous</span>
+            </div>
+          </div>
+        </div>
+        <!-- Travel the Future Cards -->
+        <h4 class="mb-3 mt-5" style="font-weight:600; color:#2d9cdb;">Travel the Future</h4>
+        <div class="row g-4 justify-content-center">
+          <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="future-card" tabindex="0">
+              <img src="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80" alt="Supersonic Jet" class="img-fluid rounded mb-3" />
+              <h6>Supersonic Jet</h6>
+              <p class="mb-0">Reach any continent in hours. The next generation of air travel.</p>
+            </div>
+          </div>
+          <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="future-card" tabindex="0">
+              <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=400&q=80" alt="Eco Airliner" class="img-fluid rounded mb-3" />
+              <h6>Eco Airliner</h6>
+              <p class="mb-0">Fly green with our zero-emissions, ultra-quiet aircraft.</p>
+            </div>
+          </div>
+          <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="future-card" tabindex="0">
+              <img src="https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=400&q=80" alt="Sky Lounge Suite" class="img-fluid rounded mb-3" />
+              <h6>Sky Lounge Suite</h6>
+              <p class="mb-0">Enjoy luxury, privacy, and panoramic views at 35,000 feet.</p>
+            </div>
+          </div>
+          <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="future-card" tabindex="0">
+              <img src="https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=400&q=80" alt="Smart Boarding" class="img-fluid rounded mb-3" />
+              <h6>Smart Boarding</h6>
+              <p class="mb-0">Seamless, touchless boarding powered by AI and biometrics.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Book Ticket -->
+    <section id="bookSection" class="main-section d-none">
+      <div class="booking-card">
+        <h4 class="mb-4">Search Flights</h4>
+        <form id="flightSearchForm" autocomplete="off">
+          <div class="mb-3">
+            <label for="from" class="form-label">Departure City</label>
+            <input type="text" id="from" class="form-control" placeholder="e.g. New York" required />
+          </div>
+          <div class="mb-3">
+            <label for="to" class="form-label">Destination City</label>
+            <input type="text" id="to" class="form-control" placeholder="e.g. Paris" required />
+          </div>
+          <div class="mb-3">
+            <label for="passengers" class="form-label">Number of Passengers</label>
+            <input type="number" id="passengers" class="form-control" min="1" value="1" required />
+          </div>
+          <div class="mb-3">
+            <label for="departureTime" class="form-label">Departure Time</label>
+            <input type="time" id="departureTime" class="form-control" required />
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Search Flights</button>
+        </form>
+
+        <!-- Flights Table -->
+        <div id="flightsTableDiv" class="mt-4 d-none">
+          <h5>Available Flights</h5>
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Departure</th>
+                <th>Destination</th>
+                <th>Passengers</th>
+                <th>Departure Time</th>
+                <th>Book</th>
+              </tr>
+            </thead>
+            <tbody id="flightsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- My Bookings -->
+    <section id="mybookingsSection" class="main-section d-none">
+      <div class="booking-card">
+        <h4 class="mb-4">My Bookings</h4>
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Flight</th>
+              <th>Passenger Name</th>
+              <th>Class</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="myBookingsTableBody">
+            <tr><td colspan="4" class="text-center text-muted">No bookings yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- Passenger Details Modal -->
+  <div class="modal fade" id="passengerModal" tabindex="-1" aria-labelledby="passengerModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content p-3">
+        <div class="modal-header">
+          <h5 class="modal-title" id="passengerModalLabel">Passenger Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="passengerForm" autocomplete="off">
+          <div class="modal-body">
+            <div class="mb-2">
+              <label>Name</label>
+              <input type="text" id="passengerName" class="form-control" required />
+            </div>
+            <div class="mb-2">
+              <label>Gender</label>
+              <select id="passengerGender" class="form-select" required>
+                <option value="">Select</option>
+                <option>Male</option>
+                <option>Female</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="mb-2">
+              <label>Email</label>
+              <input type="email" id="passengerEmail" class="form-control" required />
+            </div>
+            <div class="mb-2">
+              <label>Phone Number</label>
+              <input type="tel" id="passengerPhone" class="form-control" required />
+            </div>
+            <div class="mb-2">
+              <label>Date of Birth</label>
+              <input type="date" id="passengerDOB" class="form-control" required />
+            </div>
+            <div class="mb-2">
+              <label>Class</label>
+              <select id="passengerClass" class="form-select" required>
+                <option value="">Select</option>
+                <option>Economy</option>
+                <option>Business</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-success w-100">Book Ticket</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ticket Confirmation Modal -->
+  <div class="modal fade" id="ticketConfirmModal" tabindex="-1" aria-labelledby="ticketConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content p-4 text-center">
+        <h5 class="mb-3 text-success"><i class="fa-solid fa-ticket"></i> Your Ticket Has Been Booked!</h5>
+        <div id="ticketDetails"></div>
+        <button type="button" class="btn btn-primary mt-3" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Firebase config - replace with your own
+    const firebaseConfig = {
+      apiKey: "AIzaSyBnrtX5rzyGtzfkqVuxhXEccmC1WxgUxsE",
+      authDomain: "flightticketbooking-35580.firebaseapp.com",
+      projectId: "flightticketbooking-35580",
+      storageBucket: "flightticketbooking-35580.firebasestorage.app",
+      messagingSenderId: "828504592232",
+      appId: "1:828504592232:web:bec4c555c0e8d7fe4e10dd"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Interactive card animation
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.creative-quote-card, .future-card').forEach(card => {
+        card.addEventListener('click', () => {
+          card.classList.add('active');
+          setTimeout(() => card.classList.remove('active'), 500);
+        });
+        card.addEventListener('touchstart', () => {
+          card.classList.add('active');
+        });
+        card.addEventListener('touchend', () => {
+          setTimeout(() => card.classList.remove('active'), 500);
+        });
+      });
+    });
+
+    // UI Elements
+    const authCard = document.getElementById("authCard");
+    const loginDiv = document.getElementById("loginDiv");
+    const signupDiv = document.getElementById("signupDiv");
+    const mainNavbar = document.getElementById("mainNavbar");
+    const mainSections = document.getElementById("mainSections");
+    const welcomeUser = document.getElementById("welcomeUser");
+
+    const flightsTableDiv = document.getElementById('flightsTableDiv');
+    const flightsTableBody = document.getElementById('flightsTableBody');
+    const myBookingsTableBody = document.getElementById('myBookingsTableBody');
+
+    let searchedFlights = [];
+    let bookings = [];
+    let currentFlightIndex = null;
+
+    function toggleForms() {
+      loginDiv.classList.toggle("d-none");
+      signupDiv.classList.toggle("d-none");
+    }
+
+    function showSection(section) {
+      ['home', 'book', 'mybookings'].forEach(s => {
+        document.getElementById(s + 'Section').classList.add('d-none');
+      });
+      document.getElementById(section + 'Section').classList.remove('d-none');
+      document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+      if(section === 'home') document.querySelectorAll('.nav-link')[0].classList.add('active');
+      else if(section === 'book') document.querySelectorAll('.nav-link')[1].classList.add('active');
+      else if(section === 'mybookings') document.querySelectorAll('.nav-link')[2].classList.add('active');
+    }
+
+    auth.onAuthStateChanged(user => {
+      if(user) {
+        authCard.style.display = 'none';
+        mainNavbar.classList.remove('d-none');
+        mainSections.classList.remove('d-none');
+        welcomeUser.textContent = "Welcome, " + (user.displayName || user.email.split('@')[0]);
+        showSection('home');
+      } else {
+        authCard.style.display = 'flex';
+        mainNavbar.classList.add('d-none');
+        mainSections.classList.add('d-none');
+        loginDiv.classList.remove('d-none');
+        signupDiv.classList.add('d-none');
+      }
+    });
+
+    function login() {
+      const email = document.getElementById("loginEmail").value;
+      const password = document.getElementById("loginPassword").value;
+      auth.signInWithEmailAndPassword(email, password)
+        .catch(e => alert("Login Error: " + e.message));
+    }
+
+    function signup() {
+      const email = document.getElementById("signupEmail").value;
+      const password = document.getElementById("signupPassword").value;
+      auth.createUserWithEmailAndPassword(email, password)
+        .then(() => alert("Account created! Please login."))
+        .catch(e => alert("Signup Error: " + e.message));
+    }
+
+    function logout() {
+      auth.signOut();
+    }
+
+    document.getElementById('flightSearchForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const from = document.getElementById('from').value.trim();
+      const to = document.getElementById('to').value.trim();
+      const passengers = document.getElementById('passengers').value;
+      const departureTime = document.getElementById('departureTime').value;
+
+      if(!from || !to || !departureTime || passengers < 1) {
+        alert("Please fill all fields correctly.");
+        return;
+      }
+
+      searchedFlights = [{
+        from, to, passengers, departureTime
+      }];
+
+      renderFlightsTable();
+    });
+
+    function renderFlightsTable() {
+      flightsTableBody.innerHTML = '';
+      if(searchedFlights.length === 0) {
+        flightsTableDiv.classList.add('d-none');
+        return;
+      }
+      flightsTableDiv.classList.remove('d-none');
+      searchedFlights.forEach((flight, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${flight.from}</td>
+          <td>${flight.to}</td>
+          <td>${flight.passengers}</td>
+          <td>${flight.departureTime}</td>
+          <td><button class="btn btn-sm btn-primary">Book</button></td>
+        `;
+        tr.querySelector('button').addEventListener('click', () => openPassengerModal(idx));
+        flightsTableBody.appendChild(tr);
+      });
+    }
+
+    function openPassengerModal(flightIndex) {
+      currentFlightIndex = flightIndex;
+      document.getElementById('passengerForm').reset();
+      const passengerModal = new bootstrap.Modal(document.getElementById('passengerModal'));
+      passengerModal.show();
+    }
+
+    document.getElementById('passengerForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const name = document.getElementById('passengerName').value.trim();
+      const gender = document.getElementById('passengerGender').value;
+      const email = document.getElementById('passengerEmail').value.trim();
+      const phone = document.getElementById('passengerPhone').value.trim();
+      const dob = document.getElementById('passengerDOB').value;
+      const pclass = document.getElementById('passengerClass').value;
+
+      if(!name || !gender || !email || !phone || !dob || !pclass) {
+        alert("Please fill all passenger details.");
+        return;
+      }
+
+      const flight = searchedFlights[currentFlightIndex];
+      const booking = {
+        flight,
+        passenger: {name, gender, email, phone, dob, pclass},
+        status: 'Booked'
+      };
+      bookings.push(booking);
+
+      // Send confirmation email via your backend
+      sendBookingEmail(email, `
+        Name: ${name}
+        Gender: ${gender}
+        Email: ${email}
+        Phone: ${phone}
+        Date of Birth: ${dob}
+        Class: ${pclass}
+        Flight: ${flight.from} → ${flight.to}
+        Passengers: ${flight.passengers}
+        Departure Time: ${flight.departureTime}
+      `);
+
+      bootstrap.Modal.getInstance(document.getElementById('passengerModal')).hide();
+      showTicketConfirmation(booking);
+      renderMyBookings();
+      searchedFlights = [];
+      flightsTableDiv.classList.add('d-none');
+      flightsTableBody.innerHTML = '';
+      document.getElementById('flightSearchForm').reset();
+    });
+
+    function sendBookingEmail(toEmail, bookingDetails) {
+      fetch('https://flight-ticket-booking-1.onrender.com/send-email', {
+        
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: toEmail,
+          subject: 'Your GDC Airways Ticket Confirmation',
+          text: `Your booking is confirmed!\nDetails:\n${bookingDetails}`,
+          html: `<h3>Your booking is confirmed!</h3><p>${bookingDetails.replace(/\n/g, '<br>')}</p>`
+        })
+      })
+         
+      .then(res => res.json())
+      .then(data => {
+        if(data.success) alert('Confirmation email sent!');
+        else alert('Email error: ' + data.message);
+      })
+      .catch(err => alert('Fetch error: ' + err));
+      
+    }
+
+    function showTicketConfirmation(booking) {
+      const detailsDiv = document.getElementById('ticketDetails');
+      const f = booking.flight;
+      const p = booking.passenger;
+      detailsDiv.innerHTML = `
+        <p><strong>Flight:</strong> ${f.from} to ${f.to}</p>
+        <p><strong>Departure Time:</strong> ${f.departureTime}</p>
+        <p><strong>Passengers:</strong> ${f.passengers}</p>
+        <hr/>
+        <p><strong>Name:</strong> ${p.name}</p>
+        <p><strong>Gender:</strong> ${p.gender}</p>
+        <p><strong>Email:</strong> ${p.email}</p>
+        <p><strong>Phone:</strong> ${p.phone}</p>
+        <p><strong>Date of Birth:</strong> ${p.dob}</p>
+        <p><strong>Class:</strong> ${p.pclass}</p>
+        <p><strong>Status:</strong> ${booking.status}</p>
+      `;
+      const ticketModal = new bootstrap.Modal(document.getElementById('ticketConfirmModal'));
+      ticketModal.show();
+    }
+
+    function renderMyBookings() {
+      myBookingsTableBody.innerHTML = '';
+      if(bookings.length === 0) {
+        myBookingsTableBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No bookings yet.</td></tr>';
+        return;
+      }
+      bookings.forEach(b => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${b.flight.from} → ${b.flight.to}</td>
+          <td>${b.passenger.name}</td>
+          <td>${b.passenger.pclass}</td>
+          <td>${b.status}</td>
+        `;
+        myBookingsTableBody.appendChild(tr);
+      });
+    }
+  </script>
+</body>
+</html>
